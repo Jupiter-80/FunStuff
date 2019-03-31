@@ -30,7 +30,11 @@ $TaskDefinition.Settings.AllowDemandStart = $true
 $TaskEndTime = [datetime]::Now.AddMinutes(30)
 $Triggers = $TaskDefinition.Triggers
 $Trigger = $Triggers.Create(0)
+
+#Set expiration date. Default: The end of April first
 $Trigger.EndBoundary = $TaskEndTime.ToString("2019-04-01'T'23:59:59")
+
+#Set the event that triggers the cat facts. Default: 4648 (Successful Sign in at login screen, including coming back after screen lock)
 $Trigger.Id = '4648'
 $Trigger.Subscription =  "<QueryList><Query Id='0' Path='Security'><Select Path='Security'>*[System[(EventID='4648')]]</Select></Query></QueryList>" 
 $Trigger.Enabled = $true
