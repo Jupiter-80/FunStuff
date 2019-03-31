@@ -18,7 +18,7 @@ $SpeechSynth.Speak($CatFact.fact)
 exit'
 $CatFactsScript | Out-File "$FullScriptPath"
 
-#Creates a scheduled task to run the CatFacts Script whenever someone successfully signs in at the login screen.
+#Creates a scheduled task to run the CatFacts Script whenever someone successfully signs in at a login screen.
 $Hostname = $Env:computername
 $Service = New-Object -ComObject ("Schedule.Service")
 $Service.Connect($hostname)
@@ -34,7 +34,7 @@ $Trigger = $Triggers.Create(0)
 #Set expiration date. Default: The end of April first
 $Trigger.EndBoundary = $TaskEndTime.ToString("2019-04-01'T'23:59:59")
 
-#Set the event that triggers the cat facts. Default: 4648 (Successful Sign in at login screen, including coming back after screen lock)
+#Set the event that triggers the cat facts. Default: 4648 (Successful Sign in at any login screen)
 $Trigger.Id = '4648'
 $Trigger.Subscription =  "<QueryList><Query Id='0' Path='Security'><Select Path='Security'>*[System[(EventID='4648')]]</Select></Query></QueryList>" 
 $Trigger.Enabled = $true
