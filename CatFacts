@@ -1,0 +1,40 @@
+#Modify the path and file name if desired
+$PathToScript = 'C:\CatFacts'
+$ScriptName = 'CatFacts.ps1'
+$FullScriptPath = "$PathToScript\$ScriptName"
+
+#Creates the CatFacts Script using the path above.
+mkdir "$PathToScript"
+$CatFactsScript = 'Add-Type -AssemblyName System.Speech
+$SpeechSynth = New-Object System.Speech.Synthesis.SpeechSynthesizer
+$SpeechSynth.SelectVoice("Microsoft Zira Desktop")
+$Browser = New-Object System.Net.WebClient
+$Browser.Proxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$CatFact = (ConvertFrom-Json (Invoke-WebRequest -Verbose -Uri https://catfact.ninja/fact -UseBasicParsing))
+$CatFact.fact
+$SpeechSynth.Speak("Did you know ?")
+$SpeechSynth.Speak($CatFact.fact)
+exit'
+$CatFactsScript | Out-File "$FullScriptPath"
+
+#Creates a scheduled task to run the CatFacts Script whenever someone successfully signs in at the login screen.
+$Hostname = $Env:computername
+$Service = New-Object -ComObject ("Schedule.Service")
+$Service.Connect($hostname)
+$RootFolder = $Service.GetFolder("\")
+$TaskDefinition = $Service.NewTask(0)
+$TaskDefinition.RegistrationInfo.Description = 'April Fools!'
+$TaskDefinition.Settings.Enabled = $true
+$TaskDefinition.Settings.AllowDemandStart = $true
+$TaskEndTime = [datetime]::Now.AddMinutes(30)
+$Triggers = $TaskDefinition.Triggers
+$Trigger = $Triggers.Create(0)
+$Trigger.EndBoundary = $TaskEndTime.ToString("2019-04-01'T'23:59:59")
+$Trigger.Id = '4648'
+$Trigger.Subscription =  "<QueryList><Query Id='0' Path='Security'><Select Path='Security'>*[System[(EventID='4648')]]</Select></Query></QueryList>" 
+$Trigger.Enabled = $true
+$Action = $TaskDefinition.Actions.Create(0)
+$Action.Path = "PowerShell.exe"
+$action.Arguments = "-executionpolicy Bypass -file $FullScriptPath"
+$RootFolder.RegisterTaskDefinition('CatFacts', $TaskDefinition, 6, "System", $null, 5) | Out-Null
